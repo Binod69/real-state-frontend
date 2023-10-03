@@ -1,14 +1,50 @@
 'use client';
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Card, CardBody, Input, Button } from '@nextui-org/react';
+import { useForm } from 'react-hook-form';
 import { PiEyeBold, PiEyeClosedBold } from 'react-icons/pi';
 import { BiSolidPaperPlane } from 'react-icons/bi';
+import axiosInstance from '../../config/axios.config';
+import apiEndpoints from '../../config/apiEndpoints';
 
 const Register = () => {
   const [isVisible, setIsVisible] = useState(false);
-
+  const [loading, setLoading] = useState(null);
+  //   const [error, setError] = useState(null);
   const toggleVisibility = () => setIsVisible(!isVisible);
+  const router = useRouter();
+
+  const {
+    register,
+    formState: { errors },
+    handleSubmit,
+    watch,
+  } = useForm();
+  console.log(errors);
+  const onSubmit = async (data) => {
+    try {
+      setLoading(true);
+      const res = await axiosInstance.post(apiEndpoints.REGISTER, data);
+      const result = res.data;
+      console.log(result);
+      if (result.success === false) {
+        setLoading(false);
+        // setError(result.message);
+        return;
+      }
+      setLoading(false);
+      //   setError(null);
+      router.push('/signin');
+      return;
+    } catch (error) {
+      setLoading(false);
+      //   setError(error.message);
+      console.log(error.message);
+    }
+  };
+  //   console.log(watch('email'));
 
   return (
     <>
@@ -18,18 +54,33 @@ const Register = () => {
         </h2>
         <Card radius="sm" shadow="sm" className="lg:w-[25rem] mt-5">
           <CardBody>
-            <form className="max-w-[100%]">
-              <Input isClearable size="sm" type="text" label="Username" />
+            <form onSubmit={handleSubmit(onSubmit)} className="max-w-[100%]">
+              <Input
+                isClearable
+                size="sm"
+                type="text"
+                label="Username"
+                variant="bordered"
+                {...register('username', {
+                  required: 'username is a required filed',
+                })}
+                aria-invalid={errors.username ? 'true' : 'false'}
+                errorMessage={errors.message}
+              />
               <Input
                 isClearable
                 size="sm"
                 type="email"
                 label="Email"
+                variant="bordered"
                 className="my-4"
+                {...register('email', { required: true })}
+                aria-invalid={errors.email ? 'true' : 'false'}
               />
               <Input
                 size="sm"
                 label="Password"
+                variant="bordered"
                 endContent={
                   <button
                     className="focus:outline-none"
@@ -45,16 +96,21 @@ const Register = () => {
                 }
                 type={isVisible ? 'text' : 'password'}
                 className="my-4"
+                {...register('password', { required: true })}
+                aria-invalid={errors.password ? 'true' : 'false'}
               />
               <Button
+                disabled={loading}
+                radius="sm"
                 color="primary"
                 type="submit"
                 endContent={<BiSolidPaperPlane />}
                 className=" disabled:opacity-80 w-[100%]"
               >
-                Submit
+                {loading ? 'loading...' : '  Submit'}
               </Button>
             </form>
+
             <div className="flex mt-4">
               <p>Have an account?</p>
               <Link href="/signin" className="text-blue-500 ms-2 underline">
@@ -63,6 +119,7 @@ const Register = () => {
             </div>
           </CardBody>
         </Card>
+        {errors && <p>{errors.message}</p>}
       </div>
     </>
   );
