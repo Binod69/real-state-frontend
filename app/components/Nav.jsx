@@ -12,6 +12,7 @@ import {
   Dropdown,
   DropdownMenu,
   Avatar,
+  Button,
   NavbarMenuToggle,
   NavbarMenu,
   NavbarMenuItem,
@@ -36,22 +37,20 @@ const Nav = () => {
           />
           <NavbarBrand className="mr-4">
             {/* <AcmeLogo /> */}
-            <p className="hidden sm:block font-bold text-inherit">ACME</p>
+            <h2 className="hidden sm:block font-bold text-inherit">
+              Real
+              <span className=" text-slate-500">Estate</span>
+            </h2>
           </NavbarBrand>
           <NavbarContent className="hidden sm:flex gap-3">
             <NavbarItem>
-              <Link color="foreground" href="#">
-                Features
-              </Link>
-            </NavbarItem>
-            <NavbarItem isActive>
-              <Link href="#" aria-current="page" color="secondary">
-                Customers
+              <Link color="foreground" href="/">
+                Home
               </Link>
             </NavbarItem>
             <NavbarItem>
-              <Link color="foreground" href="#">
-                Integrations
+              <Link href="/about" color="secondary">
+                About
               </Link>
             </NavbarItem>
           </NavbarContent>
@@ -60,7 +59,7 @@ const Nav = () => {
         <NavbarContent as="div" className="items-center" justify="end">
           <Input
             classNames={{
-              base: 'max-w-full sm:max-w-[10rem] h-10',
+              base: 'max-w-full sm:max-w-[10rem] w-[10rem] h-10',
               mainWrapper: 'h-full',
               input: 'text-small',
               inputWrapper:
@@ -71,7 +70,16 @@ const Nav = () => {
             startContent={<AiOutlineSearch size={18} />}
             type="search"
           />
-          <Dropdown placement="bottom-end">
+          <NavbarItem className="hidden lg:flex">
+            <Link href="/signin">Login</Link>
+          </NavbarItem>
+          <NavbarItem>
+            <Button as={Link} color="primary" href="/signup" variant="flat">
+              Sign Up
+            </Button>
+          </NavbarItem>
+
+          {/* <Dropdown placement="bottom-end">
             <DropdownTrigger>
               <Avatar
                 isBordered
@@ -100,11 +108,14 @@ const Nav = () => {
                 Log Out
               </DropdownItem>
             </DropdownMenu>
-          </Dropdown>
+          </Dropdown> */}
         </NavbarContent>
         <NavbarMenu>
           <NavbarMenuItem>
             <Link href="/">Home</Link>
+          </NavbarMenuItem>
+          <NavbarMenuItem>
+            <Link href="/about">About</Link>
           </NavbarMenuItem>
         </NavbarMenu>
       </Navbar>
