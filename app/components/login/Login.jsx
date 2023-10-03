@@ -2,49 +2,59 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useDispatch, useSelector } from 'react-redux';
 import { Card, CardBody, Input, Button } from '@nextui-org/react';
 import { useForm } from 'react-hook-form';
 import { PiEyeBold, PiEyeClosedBold } from 'react-icons/pi';
 import { BiSolidPaperPlane } from 'react-icons/bi';
+import {
+  signInStart,
+  signInSuccess,
+  signInFailure,
+} from '../../redux/user.slice';
 import axiosInstance from '../../config/axios.config';
 import apiEndpoints from '../../config/apiEndpoints';
 
 const Login = () => {
   const [isVisible, setIsVisible] = useState(false);
-  const [loading, setLoading] = useState(null);
-  //   const [error, setError] = useState(null);
+  const state = useSelector((state) => state.user);
+  console.log(state);
+  const { loading, error } = state || {};
+  console.log(loading);
   const toggleVisibility = () => setIsVisible(!isVisible);
   const router = useRouter();
+  const dispatch = useDispatch();
 
-  const {
-    register,
-    formState: { errors },
-    handleSubmit,
-    watch,
-  } = useForm();
-  console.log(errors);
+  // const {
+  //   register,
+  //   formState: { errors },
+  //   handleSubmit,
+  // } = useForm();
+
+  const formMethods = useForm();
+  // console.log(errors);
+
   const onSubmit = async (data) => {
     try {
-      setLoading(true);
+      dispatch(signInStart());
       const res = await axiosInstance.post(apiEndpoints.LOGIN, data);
-      const result = res.data;
+      await res.data;
       console.log(result);
-      if (result.success === false) {
-        setLoading(false);
-        // setError(result.message);
+
+      if (data.success === false) {
+        // Handle login failure
+        dispatch(signInFailure(data.message));
+        console.error('Login failed:', data.message);
         return;
       }
-      setLoading(false);
-      //   setError(null);
+      dispatch(signInSuccess(data));
       router.push('/');
-      return;
     } catch (error) {
-      setLoading(false);
-      //   setError(error.message);
-      console.log(error.message);
+      // Handle network or server errors
+      dispatch(signInFailure(error.message));
+      console.error('Login error:', error.message);
     }
   };
-  //   console.log(watch('email'));
 
   return (
     <>
@@ -54,7 +64,10 @@ const Login = () => {
         </h2>
         <Card radius="sm" shadow="sm" className="lg:w-[25rem] mt-5">
           <CardBody>
-            <form onSubmit={handleSubmit(onSubmit)} className="max-w-[100%]">
+            <form
+              onSubmit={formMethods.handleSubmit(onSubmit)}
+              className="max-w-[100%]"
+            >
               <Input
                 isClearable
                 size="sm"
@@ -62,8 +75,8 @@ const Login = () => {
                 label="Email"
                 variant="bordered"
                 className="my-4"
-                {...register('email', { required: true })}
-                aria-invalid={errors.email ? 'true' : 'false'}
+                {...formMethods.register('email', { required: true })}
+                // aria-invalid={error.message.email ? 'true' : 'false'}
               />
               <Input
                 size="sm"
@@ -84,8 +97,8 @@ const Login = () => {
                 }
                 type={isVisible ? 'text' : 'password'}
                 className="my-4"
-                {...register('password', { required: true })}
-                aria-invalid={errors.password ? 'true' : 'false'}
+                {...formMethods.register('password', { required: true })}
+                // aria-invalid={errors.password ? 'true' : 'false'}
               />
               <Button
                 disabled={loading}
@@ -107,7 +120,7 @@ const Login = () => {
             </div>
           </CardBody>
         </Card>
-        {errors && <p>{errors.message}</p>}
+        {error && <p className="text-red-500 mt-10">{error.message}</p>}
       </div>
     </>
   );

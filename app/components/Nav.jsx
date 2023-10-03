@@ -71,10 +71,10 @@ const Nav = () => {
             type="search"
           />
           <NavbarItem className="hidden lg:flex">
-            <Link href="/signin">Login</Link>
+            <Link href="/sign-in">Login</Link>
           </NavbarItem>
           <NavbarItem>
-            <Button as={Link} color="primary" href="/signup" variant="flat">
+            <Button as={Link} color="primary" href="/sign-up" variant="flat">
               Sign Up
             </Button>
           </NavbarItem>

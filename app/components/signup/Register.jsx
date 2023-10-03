@@ -23,6 +23,7 @@ const Register = () => {
     watch,
   } = useForm();
   console.log(errors);
+
   const onSubmit = async (data) => {
     try {
       setLoading(true);

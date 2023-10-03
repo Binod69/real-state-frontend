@@ -1,7 +1,7 @@
 'use client';
 import { NextUIProvider } from '@nextui-org/react';
-const Provider = ({ children }) => {
+const UiProvider = ({ children }) => {
   return <NextUIProvider>{children}</NextUIProvider>;
 };
 
-export default Provider;
+export default UiProvider;
