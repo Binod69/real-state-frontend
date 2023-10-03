@@ -9,7 +9,7 @@ import { BiSolidPaperPlane } from 'react-icons/bi';
 import axiosInstance from '../../config/axios.config';
 import apiEndpoints from '../../config/apiEndpoints';
 
-const Register = () => {
+const Login = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [loading, setLoading] = useState(null);
   //   const [error, setError] = useState(null);
@@ -26,7 +26,7 @@ const Register = () => {
   const onSubmit = async (data) => {
     try {
       setLoading(true);
-      const res = await axiosInstance.post(apiEndpoints.REGISTER, data);
+      const res = await axiosInstance.post(apiEndpoints.LOGIN, data);
       const result = res.data;
       console.log(result);
       if (result.success === false) {
@@ -36,7 +36,7 @@ const Register = () => {
       }
       setLoading(false);
       //   setError(null);
-      router.push('/signin');
+      router.push('/');
       return;
     } catch (error) {
       setLoading(false);
@@ -50,23 +50,11 @@ const Register = () => {
     <>
       <div className=" my-10 grid place-content-center">
         <h2 className=" font-bold text-2xl text-center text-slate-500">
-          Register
+          Login
         </h2>
         <Card radius="sm" shadow="sm" className="lg:w-[25rem] mt-5">
           <CardBody>
             <form onSubmit={handleSubmit(onSubmit)} className="max-w-[100%]">
-              <Input
-                isClearable
-                size="sm"
-                type="text"
-                label="Username"
-                variant="bordered"
-                {...register('username', {
-                  required: 'username is a required filed',
-                })}
-                aria-invalid={errors.username ? 'true' : 'false'}
-                errorMessage={errors.message}
-              />
               <Input
                 isClearable
                 size="sm"
@@ -107,14 +95,14 @@ const Register = () => {
                 endContent={<BiSolidPaperPlane />}
                 className=" disabled:opacity-80 w-[100%]"
               >
-                {loading ? 'loading...' : 'Register'}
+                {loading ? 'loading...' : 'Login'}
               </Button>
             </form>
 
             <div className="flex mt-4">
-              <p>Have an account?</p>
-              <Link href="/signin" className="text-blue-500 ms-2 underline">
-                Login
+              <p>Dont Have an account?</p>
+              <Link href="/signup" className="text-blue-500 ms-2 underline">
+                Register
               </Link>
             </div>
           </CardBody>
@@ -125,4 +113,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default Login;
