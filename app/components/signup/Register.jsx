@@ -24,11 +24,7 @@ const Register = () => {
   // console.log(error);
 
   const handleChange = (e) => {
-    e.preventDefault();
-    setFormData({
-      ...formData,
-      [e.target.id]: e.target.value,
-    });
+    setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
   const handleSubmit = async (e) => {

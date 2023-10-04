@@ -89,7 +89,7 @@ const Form = () => {
     try {
       dispatch(updateUserStart());
       const res = await axiosInstance.put(
-        `${apiEndpoints.UPDATE_USER}/${currentUser.data._id}`,
+        `${apiEndpoints.UPDATE_USER}/${currentUser._id}`,
         formData,
         {
           withCredentials: true,
@@ -128,9 +128,9 @@ const Form = () => {
             isBordered
             color="warning"
             onClick={() => fileRef.current.click()}
-            src={formData.avatar || currentUser.data.avatar}
+            src={formData.avatar || currentUser.avatar}
             className="text-tiny cursor-pointer m-auto mt-3 mb-5"
-            alt={currentUser.data.username}
+            alt={currentUser.username}
             size="lg"
           />
           <div className="text-sm self-center">
@@ -171,7 +171,7 @@ const Form = () => {
             // label="Username"
             size="md"
             radius="sm"
-            defaultValue={currentUser.data.username}
+            defaultValue={currentUser.username}
             onChange={handleChange}
           />
           <Input
@@ -183,7 +183,7 @@ const Form = () => {
             // label="Email"
             size="md"
             radius="sm"
-            defaultValue={currentUser.data.email}
+            defaultValue={currentUser.email}
             onChange={handleChange}
           />
           <Input

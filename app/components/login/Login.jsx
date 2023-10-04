@@ -24,12 +24,9 @@ const Login = () => {
   const router = useRouter();
   const dispatch = useDispatch();
 
-  const handleChange = useCallback((e) => {
-    setFormData((formData) => ({
-      ...formData,
-      [e.target.id]: e.target.value,
-    }));
-  }, []);
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
 
   const onSubmit = useCallback(
     async (e) => {
