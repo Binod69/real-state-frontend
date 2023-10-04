@@ -15,6 +15,7 @@ import {
 } from '../../redux/user.slice';
 import axiosInstance from '../../config/axios.config';
 import apiEndpoints from '../../config/apiEndpoints';
+import OAuth from '../0Auth/0Auth';
 
 const Login = () => {
   const [formData, setFormData] = useState({});
@@ -114,6 +115,7 @@ const Login = () => {
               >
                 {loading ? 'loading...' : 'Login'}
               </Button>
+              <OAuth />
             </form>
 
             <div className="flex mt-4">

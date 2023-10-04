@@ -8,10 +8,12 @@ import { app } from '@/app/firebase';
 import axiosInstance from '@/app/config/axios.config';
 import apiEndpoints from '@/app/config/apiEndpoints';
 import { signInSuccess } from '@/app/redux/user.slice';
+import { toast } from 'sonner';
 
 const OAuth = () => {
   const dispatch = useDispatch();
   const router = useRouter();
+
   const handleGoogleClick = async () => {
     try {
       const provider = new GoogleAuthProvider();
@@ -24,12 +26,15 @@ const OAuth = () => {
         image: result.user.photoURL,
       };
 
+      console.log('result', result);
+
       const res = await axiosInstance.post(apiEndpoints.GOOGLE, requestBody);
-      const data = await res.json();
-      dispatch(signInSuccess(data));
+      dispatch(signInSuccess(res));
+      toast.success('Login successful!');
       router.push('/');
     } catch (error) {
       console.log('Error sign in with google', error);
+      toast.error('Error sign in with google', error);
     }
   };
   return (

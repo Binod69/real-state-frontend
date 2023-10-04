@@ -82,15 +82,15 @@ const Nav = () => {
                     as="button"
                     className="transition-transform"
                     color="secondary"
-                    name={currentUser.username}
+                    alt={currentUser.data.username}
                     size="sm"
-                    src={currentUser.avatar}
+                    src={currentUser.data.avatar}
                   />
                 </DropdownTrigger>
                 <DropdownMenu aria-label="Profile Actions" variant="flat">
                   <DropdownItem key="user" className="h-14 gap-2">
                     <p className="font-semibold">Signed in as</p>
-                    <p className="font-semibold">{currentUser.username}</p>
+                    <p className="font-semibold">{currentUser.data.username}</p>
                   </DropdownItem>
                   <DropdownItem as={Link} href="/profile" key="profile">
                     Profile

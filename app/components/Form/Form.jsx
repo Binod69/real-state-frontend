@@ -33,7 +33,8 @@ import axiosInstance from '@/app/config/axios.config';
 import apiEndpoints from '@/app/config/apiEndpoints';
 
 const Form = () => {
-  const { currentUser } = useSelector((state) => state.user);
+  const { currentUser, loading, error } = useSelector((state) => state.user);
+
   const fileRef = useRef(null);
   const [file, setFile] = useState(undefined);
   const [filePerc, setFilePerc] = useState(0);
@@ -44,11 +45,10 @@ const Form = () => {
   const dispatch = useDispatch();
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-
   const [isVisible, setIsVisible] = useState(false);
-
   const toggleVisibility = () => setIsVisible(!isVisible);
 
+  //upload image on firebase
   const handleFileUpload = (file) => {
     const storage = getStorage(app);
     const fileName = new Date().getTime() + file.name;
@@ -128,7 +128,7 @@ const Form = () => {
             isBordered
             color="warning"
             onClick={() => fileRef.current.click()}
-            src={formData.avatar || currentUser.avatar}
+            src={formData.avatar || currentUser.data.avatar}
             className="text-tiny cursor-pointer m-auto mt-3 mb-5"
             alt={currentUser.username}
             size="lg"
@@ -171,7 +171,7 @@ const Form = () => {
             // label="Username"
             size="md"
             radius="sm"
-            defaultValue={currentUser.username}
+            defaultValue={currentUser.data.username}
             onChange={handleChange}
           />
           <Input
@@ -183,7 +183,7 @@ const Form = () => {
             // label="Email"
             size="md"
             radius="sm"
-            defaultValue={currentUser.email}
+            defaultValue={currentUser.data.email}
             onChange={handleChange}
           />
           <Input
@@ -210,13 +210,14 @@ const Form = () => {
             }
           />
           <Button
+            isDisabled={loading}
             radius="sm"
             color="primary"
             type="submit"
             endContent={<RxUpdate size={20} />}
             className=" disabled:opacity-80 w-[100%] mt-3"
           >
-            Update
+            {loading ? 'loading...' : ' Update'}
           </Button>
         </form>
         <div className="mt-2">
