@@ -13,6 +13,10 @@ const persistConfig = {
   version: 1,
 };
 
+if (typeof window !== 'undefined' && window.localStorage) {
+  persistConfig.storage = storage;
+}
+
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 export const store = configureStore({

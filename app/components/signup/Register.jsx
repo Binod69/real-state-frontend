@@ -35,7 +35,9 @@ const Register = () => {
     e.preventDefault();
     try {
       setLoading(true);
-      const res = await axiosInstance.post(apiEndpoints.REGISTER, formData);
+      const res = await axiosInstance.post(apiEndpoints.REGISTER, formData, {
+        withCredentials: true,
+      });
       const data = res;
       console.log(data);
       if (data.success === false) {
@@ -47,9 +49,13 @@ const Register = () => {
       setError(null);
       router.push('/sign-in');
     } catch (error) {
-      setLoading(false);
-      setError(error.message);
-      console.log(error.message);
+      if (error && error.message) {
+        dispatch(signInFailure(error.message));
+        toast.error(error.message);
+      } else {
+        dispatch(signInFailure('An unknown error occurred'));
+        toast.error('An unknown error occurred');
+      }
     }
   };
 

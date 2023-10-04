@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
@@ -19,39 +19,48 @@ import apiEndpoints from '../../config/apiEndpoints';
 const Login = () => {
   const [formData, setFormData] = useState({});
   const [isVisible, setIsVisible] = useState(false);
-  const { loading, error } = useSelector((state) => state.user);
   const toggleVisibility = () => setIsVisible(!isVisible);
+  const { loading, error } = useSelector((state) => state.user);
   const router = useRouter();
   const dispatch = useDispatch();
 
-  const handleChange = (e) => {
-    setFormData({
+  const handleChange = useCallback((e) => {
+    setFormData((formData) => ({
       ...formData,
       [e.target.id]: e.target.value,
-    });
-  };
+    }));
+  }, []);
 
-  const onSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      dispatch(signInStart());
-      const res = await axiosInstance.post(apiEndpoints.LOGIN, formData);
-      const data = res;
-      console.log(data);
+  const onSubmit = useCallback(
+    async (e) => {
+      e.preventDefault();
+      console.log('Submitting form');
+      try {
+        dispatch(signInStart());
+        console.log('signInStart dispatched');
+        const res = await axiosInstance.post(apiEndpoints.LOGIN, formData, {
+          withCredentials: true,
+        });
+        console.log('Network request completed', res);
 
-      if (data.success === false) {
-        dispatch(signInFailure(data.message));
-        toast.error(data.message);
-        return;
+        if (res.success === false) {
+          dispatch(signInFailure(res.message));
+          toast.error(res.message);
+          return;
+        }
+        dispatch(signInSuccess(res));
+        router.push('/');
+        toast.success('login Successful!');
+      } catch (error) {
+        console.error('Error in onSubmit', error);
+        const errorMessage =
+          error && error.message ? error.message : 'An unknown error occurred';
+        dispatch(signInFailure(errorMessage));
+        toast.error(errorMessage);
       }
-      dispatch(signInSuccess(data));
-      router.push('/');
-      toast.success('login Successful!');
-    } catch (error) {
-      dispatch(signInFailure(error.message));
-      toast.error(error.message);
-    }
-  };
+    },
+    [dispatch, formData, router]
+  );
 
   return (
     <>

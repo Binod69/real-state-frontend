@@ -81,7 +81,7 @@ const Form = () => {
   }, [file]);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.id]: [e.target.value] });
+    setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
@@ -89,19 +89,27 @@ const Form = () => {
     try {
       dispatch(updateUserStart());
       const res = await axiosInstance.put(
-        `${apiEndpoints.UPDATE_USER}/${currentUser.data.user._id}`,
-        formData
+        `${apiEndpoints.UPDATE_USER}/${currentUser.data._id}`,
+        formData,
+        {
+          withCredentials: true,
+        }
       );
-      const data = res;
-      if (data.status === false) {
-        dispatch(updateUserFailure(data.data.message));
-        return;
+      if (res.status >= 200 && res.status < 300) {
+        dispatch(updateUserSuccess(res.data));
+        toast.success('Profile updated!');
+      } else {
+        throw new Error(`HTTP error! status: ${res.status}`);
       }
-      dispatch(updateUserSuccess(data));
-      toast.success('Profile updated!');
     } catch (error) {
-      dispatch(updateUserFailure(error.message));
-      toast.error('Error updating profile!');
+      console.error('A problem occurred when updating the profile:', error);
+      if (error && error.message) {
+        dispatch(updateUserFailure(error.message));
+        toast.error('Error updating profile!');
+      } else {
+        dispatch(updateUserFailure('An unknown error occurred'));
+        toast.error('An unknown error occurred while updating profile!');
+      }
     }
   };
 
