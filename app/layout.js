@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import ReduxProvider from './ReduxProvider';
 import UiProvider from './UiProvider';
 import Nav from './components/Nav';
+import { Toaster } from 'sonner';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -18,6 +19,7 @@ export default function RootLayout({ children }) {
         <ReduxProvider>
           <UiProvider>
             <Nav />
+            <Toaster closeButton />
             <main>{children}</main>
           </UiProvider>
         </ReduxProvider>

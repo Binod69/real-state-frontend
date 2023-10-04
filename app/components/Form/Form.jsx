@@ -5,12 +5,31 @@ import {
   ref,
   uploadBytesResumable,
 } from 'firebase/storage';
-import { Avatar, Input, Button, Progress } from '@nextui-org/react';
+import {
+  Avatar,
+  Input,
+  Button,
+  Progress,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  useDisclosure,
+} from '@nextui-org/react';
 import NextImage from 'next/image';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { toast } from 'sonner';
 import { PiEyeBold, PiEyeClosedBold } from 'react-icons/pi';
 import { RxUpdate } from 'react-icons/rx';
+import { BiTrashAlt } from 'react-icons/bi';
 import { app } from '@/app/firebase';
+import {
+  updateUserStart,
+  updateUserSuccess,
+  updateUserFailure,
+} from '../../redux/user.slice';
+import axiosInstance from '@/app/config/axios.config';
+import apiEndpoints from '@/app/config/apiEndpoints';
 
 const Form = () => {
   const { currentUser } = useSelector((state) => state.user);
@@ -19,35 +38,15 @@ const Form = () => {
   const [filePerc, setFilePerc] = useState(0);
   const [fileUploadError, setFileUploadError] = useState(false);
   const [formData, setFormData] = useState({});
+  // console.log(formData);
+
+  const dispatch = useDispatch();
+
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   const [isVisible, setIsVisible] = useState(false);
 
   const toggleVisibility = () => setIsVisible(!isVisible);
-
-  //   const handleFileUpload = (file) => {
-  //     const storage = getStorage(app);
-  //     const fileName = new Date().getTime() + file.name;
-  //     const storageRef = ref(storage, fileName);
-  //     const uploadTask = uploadBytesResumable(storageRef, file);
-
-  //     uploadTask.on(
-  //       'state_changed',
-  //       (snapshot) => {
-  //         const progress =
-  //           (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-  //         console.log('Upload is' + progress + '% done');
-  //         setFilePerc(Math.round(progress));
-  //       },
-  //       (error) => {
-  //         setFileUploadError(true);
-  //       },
-  //       () => {
-  //         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) =>
-  //           setFormData({ ...formData, avatar: downloadURL })
-  //         );
-  //       }
-  //     );
-  //   };
 
   const handleFileUpload = (file) => {
     const storage = getStorage(app);
@@ -79,10 +78,36 @@ const Form = () => {
       handleFileUpload(file);
     }
   }, [file]);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.id]: [e.target.value] });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      dispatch(updateUserStart());
+      const res = await axiosInstance.put(
+        `${apiEndpoints.UPDATE_USER}/${currentUser.data.data.user._id}`,
+        formData
+      );
+      const data = res;
+      if (data.status === false) {
+        dispatch(updateUserFailure(data.data.message));
+        return;
+      }
+      dispatch(updateUserSuccess(data));
+      toast.success('Profile updated!');
+    } catch (error) {
+      dispatch(updateUserFailure(error.message));
+      toast.error('Error updating profile!');
+    }
+  };
+
   return (
     <>
       <div>
-        <form>
+        <form onSubmit={handleSubmit}>
           <input
             onChange={(e) => setFile(e.target.files[0])}
             type="file"
@@ -132,19 +157,23 @@ const Form = () => {
             className="w-[25rem]"
             type="text"
             variant="bordered"
-            label="Username"
-            size="sm"
+            // label="Username"
+            size="md"
             radius="sm"
+            defaultValue={currentUser.data.data.user.username}
+            onChange={handleChange}
           />
           <Input
             isClearable
-            is="email"
+            id="email"
             className="w-[25rem] my-4"
             type="email"
             variant="bordered"
-            label="Email"
-            size="sm"
+            // label="Email"
+            size="md"
             radius="sm"
+            defaultValue={currentUser.data.data.user.email}
+            onChange={handleChange}
           />
           <Input
             className="w-[25rem]"
@@ -154,6 +183,7 @@ const Form = () => {
             label="Password"
             size="sm"
             radius="sm"
+            onChange={handleChange}
             endContent={
               <button
                 className="focus:outline-none"
@@ -178,6 +208,39 @@ const Form = () => {
             Update
           </Button>
         </form>
+        <div className="mt-2">
+          <Button
+            onPress={onOpen}
+            variant="bordered"
+            endContent={<BiTrashAlt size={20} />}
+          >
+            Delete account
+          </Button>
+          <Modal backdrop="blur" isOpen={isOpen} onOpenChange={onOpenChange}>
+            <ModalContent>
+              {(onClose) => (
+                <>
+                  <ModalHeader className="flex flex-col gap-1">
+                    Delete the account ?
+                  </ModalHeader>
+
+                  <ModalFooter>
+                    <Button color="danger" variant="light" onPress={onClose}>
+                      Close
+                    </Button>
+                    <Button
+                      endContent={<BiTrashAlt />}
+                      color="primary"
+                      onPress={onClose}
+                    >
+                      Delete
+                    </Button>
+                  </ModalFooter>
+                </>
+              )}
+            </ModalContent>
+          </Modal>
+        </div>
       </div>
     </>
   );
