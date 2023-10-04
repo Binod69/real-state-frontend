@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import {
   Navbar,
@@ -17,10 +17,13 @@ import {
   NavbarMenu,
   NavbarMenuItem,
 } from '@nextui-org/react';
+import { useSelector } from 'react-redux/es/hooks/useSelector';
 import { AiOutlineSearch } from 'react-icons/ai';
 
 const Nav = () => {
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { currentUser } = useSelector((state) => state.user);
+  console.log(currentUser);
 
   return (
     <>
@@ -70,45 +73,53 @@ const Nav = () => {
             startContent={<AiOutlineSearch size={18} />}
             type="search"
           />
-          <NavbarItem className="hidden lg:flex">
-            <Link href="/sign-in">Login</Link>
-          </NavbarItem>
-          <NavbarItem>
-            <Button as={Link} color="primary" href="/sign-up" variant="flat">
-              Sign Up
-            </Button>
-          </NavbarItem>
-
-          {/* <Dropdown placement="bottom-end">
-            <DropdownTrigger>
-              <Avatar
-                isBordered
-                as="button"
-                className="transition-transform"
-                color="secondary"
-                name="Jason Hughes"
-                size="sm"
-                src="https://i.pravatar.cc/150?u=a042581f4e29026704d"
-              />
-            </DropdownTrigger>
-            <DropdownMenu aria-label="Profile Actions" variant="flat">
-              <DropdownItem key="profile" className="h-14 gap-2">
-                <p className="font-semibold">Signed in as</p>
-                <p className="font-semibold">zoey@example.com</p>
-              </DropdownItem>
-              <DropdownItem key="settings">My Settings</DropdownItem>
-              <DropdownItem key="team_settings">Team Settings</DropdownItem>
-              <DropdownItem key="analytics">Analytics</DropdownItem>
-              <DropdownItem key="system">System</DropdownItem>
-              <DropdownItem key="configurations">Configurations</DropdownItem>
-              <DropdownItem key="help_and_feedback">
-                Help & Feedback
-              </DropdownItem>
-              <DropdownItem key="logout" color="danger">
-                Log Out
-              </DropdownItem>
-            </DropdownMenu>
-          </Dropdown> */}
+          {currentUser ? (
+            <>
+              <Dropdown placement="bottom-end">
+                <DropdownTrigger>
+                  <Avatar
+                    isBordered
+                    as="button"
+                    className="transition-transform"
+                    color="secondary"
+                    name={currentUser.data.data.user.username}
+                    size="sm"
+                    src={currentUser.data.data.user.avatar}
+                  />
+                </DropdownTrigger>
+                <DropdownMenu aria-label="Profile Actions" variant="flat">
+                  <DropdownItem key="profile" className="h-14 gap-2">
+                    <p className="font-semibold">Signed in as</p>
+                    <p className="font-semibold">
+                      {currentUser.data.data.user.username}
+                    </p>
+                  </DropdownItem>
+                  <DropdownItem as={Link} href="/profile" key="profile">
+                    Profile
+                  </DropdownItem>
+                  <DropdownItem key="logout" color="danger">
+                    Log Out
+                  </DropdownItem>
+                </DropdownMenu>
+              </Dropdown>
+            </>
+          ) : (
+            <>
+              <NavbarItem className="hidden lg:flex">
+                <Link href="/sign-in">Login</Link>
+              </NavbarItem>
+              <NavbarItem>
+                <Button
+                  as={Link}
+                  color="primary"
+                  href="/sign-up"
+                  variant="flat"
+                >
+                  Sign Up
+                </Button>
+              </NavbarItem>
+            </>
+          )}
         </NavbarContent>
         <NavbarMenu>
           <NavbarMenuItem>

@@ -34,11 +34,8 @@ const Login = () => {
     e.preventDefault();
     try {
       dispatch(signInStart());
-      const res = await axiosInstance.post(
-        apiEndpoints.LOGIN,
-        JSON.stringify(formData)
-      );
-      const data = JSON.stringify(res);
+      const res = await axiosInstance.post(apiEndpoints.LOGIN, formData);
+      const data = res;
       console.log(data);
 
       if (data.success === false) {

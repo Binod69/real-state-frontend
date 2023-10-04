@@ -1,11 +1,13 @@
 import React from 'react';
+import Private from '../components/Private/Private';
+import ProfileScreen from '../screen/Profile.screen';
 
 const page = () => {
   return (
     <>
-      <div>
-        <h2>profile page</h2>
-      </div>
+      <Private>
+        <ProfileScreen />
+      </Private>
     </>
   );
 };
