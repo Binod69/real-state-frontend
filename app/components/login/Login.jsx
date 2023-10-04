@@ -16,43 +16,39 @@ import axiosInstance from '../../config/axios.config';
 import apiEndpoints from '../../config/apiEndpoints';
 
 const Login = () => {
+  const [formData, setFormData] = useState({});
   const [isVisible, setIsVisible] = useState(false);
-  const state = useSelector((state) => state.user);
-  console.log(state);
-  const { loading, error } = state || {};
-  console.log(loading);
+  const { loading, error } = useSelector((state) => state.user);
   const toggleVisibility = () => setIsVisible(!isVisible);
   const router = useRouter();
   const dispatch = useDispatch();
 
-  // const {
-  //   register,
-  //   formState: { errors },
-  //   handleSubmit,
-  // } = useForm();
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.id]: e.target.value,
+    });
+  };
 
-  const formMethods = useForm();
-  // console.log(errors);
-
-  const onSubmit = async (data) => {
+  const onSubmit = async (e) => {
+    e.preventDefault();
     try {
       dispatch(signInStart());
-      const res = await axiosInstance.post(apiEndpoints.LOGIN, data);
-      await res.data;
-      console.log(result);
+      const res = await axiosInstance.post(
+        apiEndpoints.LOGIN,
+        JSON.stringify(formData)
+      );
+      const data = res;
+      console.log(data);
 
       if (data.success === false) {
-        // Handle login failure
         dispatch(signInFailure(data.message));
-        console.error('Login failed:', data.message);
         return;
       }
       dispatch(signInSuccess(data));
       router.push('/');
     } catch (error) {
-      // Handle network or server errors
       dispatch(signInFailure(error.message));
-      console.error('Login error:', error.message);
     }
   };
 
@@ -64,22 +60,23 @@ const Login = () => {
         </h2>
         <Card radius="sm" shadow="sm" className="lg:w-[25rem] mt-5">
           <CardBody>
-            <form
-              onSubmit={formMethods.handleSubmit(onSubmit)}
-              className="max-w-[100%]"
-            >
+            <form onSubmit={onSubmit} className="max-w-[100%]">
               <Input
                 isClearable
+                id="email"
+                name="email"
                 size="sm"
                 type="email"
                 label="Email"
                 variant="bordered"
                 className="my-4"
-                {...formMethods.register('email', { required: true })}
+                onChange={handleChange}
                 // aria-invalid={error.message.email ? 'true' : 'false'}
               />
               <Input
                 size="sm"
+                id="password"
+                name="password"
                 label="Password"
                 variant="bordered"
                 endContent={
@@ -97,7 +94,7 @@ const Login = () => {
                 }
                 type={isVisible ? 'text' : 'password'}
                 className="my-4"
-                {...formMethods.register('password', { required: true })}
+                onChange={handleChange}
                 // aria-invalid={errors.password ? 'true' : 'false'}
               />
               <Button
@@ -120,7 +117,7 @@ const Login = () => {
             </div>
           </CardBody>
         </Card>
-        {error && <p className="text-red-500 mt-10">{error.message}</p>}
+        {error && <p className="text-red-500 mt-10">{error}</p>}
       </div>
     </>
   );

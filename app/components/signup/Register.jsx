@@ -10,10 +10,13 @@ import axiosInstance from '../../config/axios.config';
 import apiEndpoints from '../../config/apiEndpoints';
 
 const Register = () => {
-  const [isVisible, setIsVisible] = useState(false);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
+    useState(false);
   const [loading, setLoading] = useState(null);
-  //   const [error, setError] = useState(null);
-  const toggleVisibility = () => setIsVisible(!isVisible);
+  const toggleVisibility = () => setIsPasswordVisible(!isPasswordVisible);
+  const toggleConfirmPasswordVisibility = () =>
+    setIsConfirmPasswordVisible(!isConfirmPasswordVisible);
   const router = useRouter();
 
   const {
@@ -37,7 +40,7 @@ const Register = () => {
       }
       setLoading(false);
       //   setError(null);
-      router.push('/signin');
+      router.push('/sign-in');
       return;
     } catch (error) {
       setLoading(false);
@@ -66,7 +69,7 @@ const Register = () => {
                   required: 'username is a required filed',
                 })}
                 aria-invalid={errors.username ? 'true' : 'false'}
-                errorMessage={errors.message}
+                // errorMessage={errors.username.message}
               />
               <Input
                 isClearable
@@ -77,6 +80,7 @@ const Register = () => {
                 className="my-4"
                 {...register('email', { required: true })}
                 aria-invalid={errors.email ? 'true' : 'false'}
+                // errorMessage={errors.email.message}
               />
               <Input
                 size="sm"
@@ -88,17 +92,41 @@ const Register = () => {
                     type="button"
                     onClick={toggleVisibility}
                   >
-                    {isVisible ? (
+                    {isPasswordVisible ? (
                       <PiEyeClosedBold className="text-2xl text-default-400 pointer-events-none" />
                     ) : (
                       <PiEyeBold className="text-2xl text-default-400 pointer-events-none" />
                     )}
                   </button>
                 }
-                type={isVisible ? 'text' : 'password'}
+                type={isPasswordVisible ? 'text' : 'password'}
                 className="my-4"
                 {...register('password', { required: true })}
                 aria-invalid={errors.password ? 'true' : 'false'}
+                // errorMessage={errors.password.message}
+              />
+              <Input
+                size="sm"
+                label="confirm Password"
+                variant="bordered"
+                endContent={
+                  <button
+                    className="focus:outline-none"
+                    type="button"
+                    onClick={toggleConfirmPasswordVisibility}
+                  >
+                    {isConfirmPasswordVisible ? (
+                      <PiEyeClosedBold className="text-2xl text-default-400 pointer-events-none" />
+                    ) : (
+                      <PiEyeBold className="text-2xl text-default-400 pointer-events-none" />
+                    )}
+                  </button>
+                }
+                type={isConfirmPasswordVisible ? 'text' : 'password'}
+                className="my-4"
+                {...register('passwordConfirm', { required: true })}
+                aria-invalid={errors.password ? 'true' : 'false'}
+                // errorMessage={errors.passwordConfirm.message}
               />
               <Button
                 disabled={loading}
