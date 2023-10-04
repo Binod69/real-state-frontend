@@ -8,6 +8,7 @@ import { PiEyeBold, PiEyeClosedBold } from 'react-icons/pi';
 import { BiSolidPaperPlane } from 'react-icons/bi';
 import axiosInstance from '../../config/axios.config';
 import apiEndpoints from '../../config/apiEndpoints';
+import OAuth from '../0Auth/0Auth';
 
 const Register = () => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -133,16 +134,17 @@ const Register = () => {
                 radius="sm"
                 color="primary"
                 type="submit"
-                endContent={<BiSolidPaperPlane />}
+                endContent={<BiSolidPaperPlane size={20} />}
                 className=" disabled:opacity-80 w-[100%]"
               >
                 {loading ? 'loading...' : 'Register'}
               </Button>
+              <OAuth />
             </form>
 
             <div className="flex mt-4">
               <p>Have an account?</p>
-              <Link href="/signin" className="text-blue-500 ms-2 underline">
+              <Link href="/sign-in" className="text-blue-500 ms-2 underline">
                 Login
               </Link>
             </div>

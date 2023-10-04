@@ -38,7 +38,7 @@ const Login = () => {
         apiEndpoints.LOGIN,
         JSON.stringify(formData)
       );
-      const data = res;
+      const data = JSON.stringify(res);
       console.log(data);
 
       if (data.success === false) {
