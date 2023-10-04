@@ -94,7 +94,7 @@ const Form = () => {
             isBordered
             color="warning"
             onClick={() => fileRef.current.click()}
-            src={currentUser.data.data.user.avatar}
+            src={formData.avatar || currentUser.data.data.user.avatar}
             className="text-tiny cursor-pointer m-auto mt-3 mb-5"
             alt={currentUser.data.data.user.username}
             size="lg"
@@ -105,7 +105,6 @@ const Form = () => {
                 Error Image upload (image must be less than 2 mb)
               </span>
             ) : filePerc > 0 && filePerc < 100 ? (
-              //   <span className="text-slate-700 z-30">{`Uploading ${filePerc}%`}</span>
               <Progress
                 aria-label="Uploading..."
                 size="sm"
@@ -115,9 +114,6 @@ const Form = () => {
                 className="max-w-md my-5"
               />
             ) : filePerc === 100 ? (
-              //   <span className="text-green-700 mb-2">
-              //     Image successfully uploaded!
-              //   </span>
               <Progress
                 aria-label="Uploading..."
                 size="sm"
