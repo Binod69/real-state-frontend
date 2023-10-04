@@ -11,45 +11,47 @@ import apiEndpoints from '../../config/apiEndpoints';
 import OAuth from '../0Auth/0Auth';
 
 const Register = () => {
+  const [formData, setFormData] = useState({});
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
-    useState(false);
-  const [loading, setLoading] = useState(null);
+
   const toggleVisibility = () => setIsPasswordVisible(!isPasswordVisible);
-  const toggleConfirmPasswordVisibility = () =>
-    setIsConfirmPasswordVisible(!isConfirmPasswordVisible);
+
   const router = useRouter();
 
-  const {
-    register,
-    formState: { errors },
-    handleSubmit,
-    watch,
-  } = useForm();
-  console.log(errors);
+  // console.log(error);
 
-  const onSubmit = async (data) => {
+  const handleChange = (e) => {
+    e.preventDefault();
+    setFormData({
+      ...formData,
+      [e.target.id]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     try {
       setLoading(true);
-      const res = await axiosInstance.post(apiEndpoints.REGISTER, data);
-      const result = res.data;
-      console.log(result);
-      if (result.success === false) {
+      const res = await axiosInstance.post(apiEndpoints.REGISTER, formData);
+      const data = res;
+      console.log(data);
+      if (data.success === false) {
         setLoading(false);
-        // setError(result.message);
+        setError(data.message);
         return;
       }
       setLoading(false);
-      //   setError(null);
+      setError(null);
       router.push('/sign-in');
-      return;
     } catch (error) {
       setLoading(false);
-      //   setError(error.message);
+      setError(error.message);
       console.log(error.message);
     }
   };
-  //   console.log(watch('email'));
 
   return (
     <>
@@ -59,32 +61,32 @@ const Register = () => {
         </h2>
         <Card radius="sm" shadow="sm" className="lg:w-[25rem] mt-5">
           <CardBody>
-            <form onSubmit={handleSubmit(onSubmit)} className="max-w-[100%]">
+            <form onSubmit={handleSubmit} className="max-w-[100%]">
               <Input
                 isClearable
+                id="username"
+                name="username"
                 size="sm"
                 type="text"
                 label="Username"
                 variant="bordered"
-                {...register('username', {
-                  required: 'username is a required filed',
-                })}
-                aria-invalid={errors.username ? 'true' : 'false'}
-                // errorMessage={errors.username.message}
+                onChange={handleChange}
               />
               <Input
                 isClearable
+                id="email"
+                name="email"
                 size="sm"
                 type="email"
                 label="Email"
                 variant="bordered"
                 className="my-4"
-                {...register('email', { required: true })}
-                aria-invalid={errors.email ? 'true' : 'false'}
-                // errorMessage={errors.email.message}
+                onChange={handleChange}
               />
               <Input
                 size="sm"
+                id="password"
+                name="password"
                 label="Password"
                 variant="bordered"
                 endContent={
@@ -102,33 +104,9 @@ const Register = () => {
                 }
                 type={isPasswordVisible ? 'text' : 'password'}
                 className="my-4"
-                {...register('password', { required: true })}
-                aria-invalid={errors.password ? 'true' : 'false'}
-                // errorMessage={errors.password.message}
+                onChange={handleChange}
               />
-              <Input
-                size="sm"
-                label="confirm Password"
-                variant="bordered"
-                endContent={
-                  <button
-                    className="focus:outline-none"
-                    type="button"
-                    onClick={toggleConfirmPasswordVisibility}
-                  >
-                    {isConfirmPasswordVisible ? (
-                      <PiEyeClosedBold className="text-2xl text-default-400 pointer-events-none" />
-                    ) : (
-                      <PiEyeBold className="text-2xl text-default-400 pointer-events-none" />
-                    )}
-                  </button>
-                }
-                type={isConfirmPasswordVisible ? 'text' : 'password'}
-                className="my-4"
-                {...register('passwordConfirm', { required: true })}
-                aria-invalid={errors.password ? 'true' : 'false'}
-                // errorMessage={errors.passwordConfirm.message}
-              />
+
               <Button
                 disabled={loading}
                 radius="sm"
@@ -150,7 +128,7 @@ const Register = () => {
             </div>
           </CardBody>
         </Card>
-        {errors && <p>{errors.message}</p>}
+        {error && <p>{error.message}</p>}
       </div>
     </>
   );

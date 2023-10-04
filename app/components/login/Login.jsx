@@ -7,6 +7,7 @@ import { Card, CardBody, Input, Button } from '@nextui-org/react';
 import { useForm } from 'react-hook-form';
 import { PiEyeBold, PiEyeClosedBold } from 'react-icons/pi';
 import { BiSolidPaperPlane } from 'react-icons/bi';
+import { toast } from 'sonner';
 import {
   signInStart,
   signInSuccess,
@@ -40,12 +41,15 @@ const Login = () => {
 
       if (data.success === false) {
         dispatch(signInFailure(data.message));
+        toast.error(data.message);
         return;
       }
       dispatch(signInSuccess(data));
       router.push('/');
+      toast.success('login Successful!');
     } catch (error) {
       dispatch(signInFailure(error.message));
+      toast.error(error.message);
     }
   };
 
@@ -107,8 +111,8 @@ const Login = () => {
             </form>
 
             <div className="flex mt-4">
-              <p>Dont Have an account?</p>
-              <Link href="/signup" className="text-blue-500 ms-2 underline">
+              <p>Don&apos;t Have an account?</p>
+              <Link href="/sign-up" className="text-blue-500 ms-2 underline">
                 Register
               </Link>
             </div>

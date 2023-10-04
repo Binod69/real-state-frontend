@@ -89,7 +89,7 @@ const Form = () => {
     try {
       dispatch(updateUserStart());
       const res = await axiosInstance.put(
-        `${apiEndpoints.UPDATE_USER}/${currentUser.data.data.user._id}`,
+        `${apiEndpoints.UPDATE_USER}/${currentUser.data.user._id}`,
         formData
       );
       const data = res;
@@ -120,9 +120,9 @@ const Form = () => {
             isBordered
             color="warning"
             onClick={() => fileRef.current.click()}
-            src={formData.avatar || currentUser.data.data.user.avatar}
+            src={formData.avatar || currentUser.data.avatar}
             className="text-tiny cursor-pointer m-auto mt-3 mb-5"
-            alt={currentUser.data.data.user.username}
+            alt={currentUser.data.username}
             size="lg"
           />
           <div className="text-sm self-center">
@@ -130,7 +130,8 @@ const Form = () => {
               <span className="text-red-700">
                 Error Image upload (image must be less than 2 mb)
               </span>
-            ) : filePerc > 0 && filePerc < 100 ? (
+            ) : // toast.error(' Error Image upload (image must be less than 2 mb)')
+            filePerc > 0 && filePerc < 100 ? (
               <Progress
                 aria-label="Uploading..."
                 size="sm"
@@ -152,6 +153,7 @@ const Form = () => {
               ''
             )}
           </div>
+
           <Input
             isClearable
             id="username"
@@ -161,7 +163,7 @@ const Form = () => {
             // label="Username"
             size="md"
             radius="sm"
-            defaultValue={currentUser.data.data.user.username}
+            defaultValue={currentUser.data.username}
             onChange={handleChange}
           />
           <Input
@@ -173,7 +175,7 @@ const Form = () => {
             // label="Email"
             size="md"
             radius="sm"
-            defaultValue={currentUser.data.data.user.email}
+            defaultValue={currentUser.data.email}
             onChange={handleChange}
           />
           <Input
