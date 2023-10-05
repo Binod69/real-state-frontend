@@ -18,13 +18,42 @@ import {
   NavbarMenuItem,
   useDisclosure,
 } from '@nextui-org/react';
-import { useSelector } from 'react-redux/es/hooks/useSelector';
+import { useSelector, useDispatch } from 'react-redux';
 import { AiOutlineSearch } from 'react-icons/ai';
+import axiosInstance from '../config/axios.config';
+import apiEndpoints from '../config/apiEndpoints';
+import {
+  signOutUserFailure,
+  signOutUserSuccess,
+  signOutUserStart,
+} from '../redux/user.slice';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 const Nav = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { currentUser } = useSelector((state) => state.user);
   console.log(currentUser);
+  const dispatch = useDispatch();
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    try {
+      dispatch(signOutUserStart());
+      const res = await axiosInstance.post(apiEndpoints.LOGOUT_USER);
+      const data = res;
+      if (data.status === false) {
+        dispatch(signOutUserFailure(data.message));
+        return;
+      }
+      dispatch(signOutUserSuccess(data));
+      router.push('/sign-in');
+      toast.success('Logout Successfully');
+    } catch (error) {
+      dispatch(signOutUserFailure(data.message));
+      toast.error(data.message);
+    }
+  };
 
   return (
     <>
@@ -96,7 +125,11 @@ const Nav = () => {
                   <DropdownItem as={Link} href="/profile" key="profile">
                     Profile
                   </DropdownItem>
-                  <DropdownItem key="logout" color="danger">
+                  <DropdownItem
+                    onClick={handleSignOut}
+                    key="logout"
+                    color="danger"
+                  >
                     Log Out
                   </DropdownItem>
                 </DropdownMenu>
