@@ -3,12 +3,15 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Card, CardBody, Input, Button } from '@nextui-org/react';
+import { useDispatch } from 'react-redux';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 import { PiEyeBold, PiEyeClosedBold } from 'react-icons/pi';
 import { BiSolidPaperPlane } from 'react-icons/bi';
 import axiosInstance from '../../config/axios.config';
 import apiEndpoints from '../../config/apiEndpoints';
 import OAuth from '../0Auth/0Auth';
+import { signInFailure } from '../../redux/user.slice';
 
 const Register = () => {
   const [formData, setFormData] = useState({});
@@ -20,6 +23,7 @@ const Register = () => {
   const toggleVisibility = () => setIsPasswordVisible(!isPasswordVisible);
 
   const router = useRouter();
+  const dispatch = useDispatch();
 
   // console.log(error);
 
@@ -44,6 +48,7 @@ const Register = () => {
       setLoading(false);
       setError(null);
       router.push('/sign-in');
+      toast.success('Account created successfully!');
     } catch (error) {
       if (error && error.message) {
         dispatch(signInFailure(error.message));

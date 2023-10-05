@@ -28,6 +28,9 @@ import {
   updateUserStart,
   updateUserSuccess,
   updateUserFailure,
+  deleteUserStart,
+  deleteUserSuccess,
+  deleteUserFailure,
 } from '../../redux/user.slice';
 import axiosInstance from '@/app/config/axios.config';
 import apiEndpoints from '@/app/config/apiEndpoints';
@@ -113,6 +116,36 @@ const Form = () => {
     }
   };
 
+  const handleDeleteUser = async () => {
+    try {
+      dispatch(deleteUserStart());
+      const res = await axiosInstance.delete(
+        `${apiEndpoints.DELETE_USER}/${currentUser.data._id}`,
+        {
+          withCredentials: true,
+        }
+      );
+      const data = res;
+
+      if (data.status === false) {
+        dispatch(deleteUserFailure(data.message));
+        toast.error(
+          'An unknown error occurred while deleting profile!',
+          error.message
+        );
+      }
+      dispatch(deleteUserSuccess(data));
+
+      toast.success('User deleted successfully!');
+    } catch (error) {
+      dispatch(deleteUserFailure(error.message));
+      toast.error(
+        'An unknown error occurred while deleting profile!',
+        error.message
+      );
+    }
+  };
+
   return (
     <>
       <div>
@@ -130,7 +163,7 @@ const Form = () => {
             onClick={() => fileRef.current.click()}
             src={formData.avatar || currentUser.data.avatar}
             className="text-tiny cursor-pointer m-auto mt-3 mb-5"
-            alt={currentUser.username}
+            alt={currentUser.data.username}
             size="lg"
           />
           <div className="text-sm self-center">
@@ -243,7 +276,7 @@ const Form = () => {
                     <Button
                       endContent={<BiTrashAlt />}
                       color="primary"
-                      onPress={onClose}
+                      onClick={handleDeleteUser}
                     >
                       Delete
                     </Button>
