@@ -1,7 +1,11 @@
 'use client';
 import React from 'react';
-import { Tabs, Tab, Card, CardBody } from '@nextui-org/react';
+import Link from 'next/link';
+import NextImage from 'next/image';
+import { Tabs, Tab, Card, CardBody, Image, Button } from '@nextui-org/react';
 import Form from '../components/Form/Form';
+
+import { BsHouseAdd } from 'react-icons/bs';
 
 const ProfileScreen = () => {
   return (
@@ -13,19 +17,31 @@ const ProfileScreen = () => {
         <div className="flex w-[50%] items-center justify-center m-auto flex-col my-10">
           <Tabs aria-label="Options">
             <Tab key="profile" title="Profile">
-              <Card radius="sm">
+              <Card radius="sm" shadow="sm">
                 <CardBody>
                   <Form />
                 </CardBody>
               </Card>
             </Tab>
-            <Tab key="music" title="Music">
-              <Card>
+            <Tab key="List Property" title="List Property">
+              <Card radius="sm" shadow="sm">
                 <CardBody>
-                  Ut enim ad minim veniam, quis nostrud exercitation ullamco
-                  laboris nisi ut aliquip ex ea commodo consequat. Duis aute
-                  irure dolor in reprehenderit in voluptate velit esse cillum
-                  dolore eu fugiat nulla pariatur.
+                  <Image
+                    as={NextImage}
+                    width={300}
+                    height={300}
+                    src="/images/property.svg"
+                    alt="property-image"
+                  />
+                  <Button
+                    as={Link}
+                    href="/create-listing"
+                    variant="ghost"
+                    className="mt-5"
+                    endContent={<BsHouseAdd size={17} />}
+                  >
+                    Create Listing
+                  </Button>
                 </CardBody>
               </Card>
             </Tab>
