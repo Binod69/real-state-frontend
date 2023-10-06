@@ -5,6 +5,7 @@ const apiEndpoints = {
   UPDATE_USER: '/user/update',
   DELETE_USER: '/user/delete',
   LOGOUT_USER: '/auth/logout',
+  CREATE_LISTING: 'listing/create-listing',
 };
 
 export default apiEndpoints;

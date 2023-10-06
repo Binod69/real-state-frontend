@@ -1,14 +1,10 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Card,
   CardBody,
   Input,
   Textarea,
-  Checkbox,
-  Select,
-  SelectSection,
-  SelectItem,
   CardHeader,
   Button,
   Progress,
@@ -27,6 +23,7 @@ import { BsCloudUpload } from 'react-icons/bs';
 import { HiOutlineCurrencyRupee } from 'react-icons/hi';
 import { AiOutlineArrowLeft, AiOutlineEdit } from 'react-icons/ai';
 import Link from 'next/link';
+import { useSelector } from 'react-redux';
 import { toast } from 'sonner';
 import {
   getDownloadURL,
@@ -36,20 +33,39 @@ import {
 } from 'firebase/storage';
 import { app } from '@/app/firebase';
 import { PiTrashLight } from 'react-icons/pi';
+import axiosInstance from '@/app/config/axios.config';
+import apiEndpoints from '@/app/config/apiEndpoints';
 
 const CreateListing = () => {
+  const currentUser = useSelector((state) => state.user);
   const [files, setFiles] = useState([]);
   const [filePerc, setFilePerc] = useState(0);
   const [formData, setFormData] = useState({
     imageUrls: [],
+    name: '',
+    description: '',
+    address: '',
+    type: 'rent',
+    bedrooms: 1,
+    bathrooms: 1,
+    regularPrice: 0,
+    discountedPrice: 0,
+    offer: false,
+    parking: false,
+    furnished: false,
+    useRef: currentUser._id,
   });
   const [imageUploadError, setImageUploadError] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
   // console.log(files);
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   console.log(formData);
+
+  //image submission func
   const handleImageSubmit = (e) => {
     e.preventDefault();
     if (files.length > 0 && files.length + formData.imageUrls.length < 7) {
@@ -78,6 +94,7 @@ const CreateListing = () => {
     }
   };
 
+  //upload image to firebase
   const storeImage = async (file) => {
     return new Promise((resolve, reject) => {
       const storage = getStorage(app);
@@ -104,12 +121,81 @@ const CreateListing = () => {
     });
   };
 
+  //delete image
   const handleDeleteImage = (id) => {
     setFormData({
       ...formData,
       imageUrls: formData.imageUrls.filter((_, i) => i !== id),
     });
   };
+
+  //input changes
+  const handleChange = (e) => {
+    if (e.target.id === 'sale' || e.target.id === 'rent') {
+      setFormData({
+        ...formData,
+        type: e.target.id,
+      });
+    }
+
+    if (
+      e.target.id === 'parking' ||
+      e.target.id === 'furnished' ||
+      e.target.id === 'offer'
+    ) {
+      setFormData({
+        ...formData,
+        [e.target.id]: e.target.checked,
+      });
+    }
+
+    if (
+      e.target.type === 'number' ||
+      e.target.type === 'text' ||
+      e.target.type === 'textarea'
+    ) {
+      setFormData({
+        ...formData,
+        [e.target.id]: e.target.value,
+      });
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      setLoading(true);
+      setError(false);
+
+      // const dataToSend = {
+      //   ...formData,
+      //   userRef: currentUser._id,
+      // };
+
+      const res = await axiosInstance.post(
+        apiEndpoints.CREATE_LISTING,
+        ...formData,
+        {
+          withCredentials: true,
+        }
+      );
+      console.log(res);
+      setLoading(false);
+
+      if (res.data.success === false) {
+        setError(res.data.message);
+        toast.error(res.data.message);
+      } else {
+        toast.success('Property added successfully');
+      }
+    } catch (error) {
+      setError(error.message);
+      setLoading(false);
+      toast.error(error.message);
+    }
+  };
+
   return (
     <>
       <div className="grid place-content-center my-10">
@@ -127,7 +213,7 @@ const CreateListing = () => {
           </h2>
         </div>
         <div>
-          <form className="flex  justify-between">
+          <form onSubmit={handleSubmit} className="flex  justify-between">
             <div className="me-20 my-5">
               <Card shadow="sm" radius="sm">
                 <CardBody>
@@ -139,6 +225,9 @@ const CreateListing = () => {
                     className="w-[100%]"
                     label="Name"
                     size="sm"
+                    id="name"
+                    onChange={handleChange}
+                    value={formData.name}
                   />
                   <Textarea
                     isRequired
@@ -148,6 +237,9 @@ const CreateListing = () => {
                     placeholder="Enter your description"
                     className=" w-[100%] my-3"
                     size="sm"
+                    id="description"
+                    onChange={handleChange}
+                    value={formData.description}
                   />
                   <Input
                     isRequired
@@ -157,35 +249,77 @@ const CreateListing = () => {
                     className="w-[100%]"
                     label="Address"
                     size="sm"
+                    id="address"
+                    onChange={handleChange}
+                    value={formData.address}
                   />
+
                   <div className="flex flex-wrap gap-3 mt-4">
-                    <Checkbox id="sell">Sell</Checkbox>
-                    <Checkbox defaultSelected id="rent">
-                      Rent
-                    </Checkbox>
-                    <Checkbox id="parking">Parking spot</Checkbox>
-                    <Checkbox id="furnished">Furnished</Checkbox>
-                    <Checkbox id="offer">Offer</Checkbox>
+                    <input
+                      type="checkbox"
+                      id="sale"
+                      className="w-5 cursor-pointer"
+                      onChange={handleChange}
+                      checked={formData.type === 'sale'}
+                    />
+                    <span>Sell</span>
+                    <input
+                      type="checkbox"
+                      id="rent"
+                      className="w-5 cursor-pointer"
+                      onChange={handleChange}
+                      checked={formData.type === 'rent'}
+                    />
+                    <span>Rent</span>
+                    <input
+                      type="checkbox"
+                      id="parking"
+                      className="w-5"
+                      onChange={handleChange}
+                      checked={formData.parking}
+                    />
+                    <span>Parking spot</span>
+                    <input
+                      type="checkbox"
+                      id="furnished"
+                      className="w-5"
+                      onChange={handleChange}
+                      checked={formData.furnished}
+                    />
+                    <span>Furnished</span>
+                    <input
+                      type="checkbox"
+                      id="offer"
+                      className="w-5"
+                      onChange={handleChange}
+                      checked={formData.offer}
+                    />
+                    <span>Offer</span>
                   </div>
                   <div className="flex w-full flex-wrap md:flex-nowrap gap-4 mt-4">
-                    <Select
+                    <Input
                       startContent={<BiBed />}
+                      type="number"
                       variant="bordered"
+                      className="w-[100%]"
                       label="Beds"
                       size="sm"
-                      isRequired
-                    >
-                      <SelectItem>1</SelectItem>
-                    </Select>
-                    <Select
-                      size="sm"
+                      id="bedrooms"
+                      onChange={handleChange}
+                      value={formData.bedrooms}
+                    />
+
+                    <Input
+                      type="number"
                       variant="bordered"
+                      className="w-[100%]"
                       label="Baths"
-                      className=""
+                      size="sm"
+                      onChange={handleChange}
+                      value={formData.bathrooms}
+                      id="bathrooms"
                       startContent={<FaBath />}
-                    >
-                      <SelectItem>1</SelectItem>
-                    </Select>
+                    />
                   </div>
                   <div className="flex w-full flex-wrap md:flex-nowrap gap-4 mt-4">
                     <Input
@@ -196,6 +330,9 @@ const CreateListing = () => {
                       label="Regular Price"
                       size="sm"
                       startContent={<HiOutlineCurrencyRupee />}
+                      onChange={handleChange}
+                      value={formData.regularPrice}
+                      id="regularPrice"
                     />
                     <Input
                       startContent={<HiOutlineCurrencyRupee />}
@@ -205,6 +342,9 @@ const CreateListing = () => {
                       className="w-[100%]"
                       label="Discounted Price"
                       size="sm"
+                      onChange={handleChange}
+                      value={formData.discountedPrice}
+                      id="discountedPrice"
                     />
                   </div>
                 </CardBody>
@@ -324,16 +464,18 @@ const CreateListing = () => {
                       </div>
                     ))}
                   <Button
+                    isLoading={loading}
                     type="submit"
                     className="mt-4"
                     variant="ghost"
                     color="danger"
                     endContent={<BsCloudUpload size={17} />}
                   >
-                    Create Listing
+                    {loading ? 'Creating...' : 'Create Listing'}
                   </Button>
                 </CardBody>
               </Card>
+              {error && <p>{error.message}</p>}
             </div>
           </form>
         </div>
