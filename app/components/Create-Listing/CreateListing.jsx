@@ -14,6 +14,12 @@ import {
   Progress,
   Image,
   Tooltip,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  useDisclosure,
+  Divider,
 } from '@nextui-org/react';
 import { BiBed } from 'react-icons/bi';
 import { FaBath } from 'react-icons/fa';
@@ -38,13 +44,18 @@ const CreateListing = () => {
     imageUrls: [],
   });
   const [imageUploadError, setImageUploadError] = useState(false);
+  const [uploading, setUploading] = useState(false);
   // console.log(files);
+
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+
   console.log(formData);
   const handleImageSubmit = (e) => {
     e.preventDefault();
     if (files.length > 0 && files.length + formData.imageUrls.length < 7) {
+      setUploading(true);
       const promises = [];
-
+      setImageUploadError(false);
       for (let i = 0; i < files.length; i++) {
         promises.push(storeImage(files[i]));
       }
@@ -55,12 +66,15 @@ const CreateListing = () => {
             imageUrls: formData.imageUrls.concat(urls),
           });
           setImageUploadError(false);
+          setUploading(false);
         })
         .catch((error) => {
           setImageUploadError('Image upload failed (2mb max per image)');
+          setUploading(false);
         });
     } else {
       setImageUploadError('You can only upload 6 images per listing');
+      setUploading(false);
     }
   };
 
@@ -218,12 +232,13 @@ const CreateListing = () => {
                       size="md"
                     />
                     <Button
+                      isLoading={uploading}
                       type="button"
                       onClick={handleImageSubmit}
                       color="success"
                       variant="ghost"
                     >
-                      Upload
+                      {uploading ? 'Uploading...' : ' Upload'}
                     </Button>
                   </div>
                   {imageUploadError && imageUploadError ? (
@@ -264,23 +279,48 @@ const CreateListing = () => {
                             alt="listing-image"
                             className="my-2"
                           />
+
                           <div className="flex gap-3">
                             <Tooltip showArrow={true} content="edit image">
-                              <Button type="button" isIconOnly>
+                              <Button isIconOnly>
                                 <AiOutlineEdit size={17} />
                               </Button>
                             </Tooltip>
-                            <Tooltip showArrow={true} content="delete image">
-                              <Button
-                                type="button"
-                                isIconOnly
-                                onClick={() => handleDeleteImage(id)}
-                              >
-                                <PiTrashLight size={17} />
-                              </Button>
-                            </Tooltip>
+
+                            <Button color="danger" onPress={onOpen} isIconOnly>
+                              <PiTrashLight size={17} />
+                            </Button>
+                            <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+                              <ModalContent>
+                                {(onClose) => (
+                                  <>
+                                    <ModalHeader className="flex flex-col gap-1">
+                                      Delete image?
+                                    </ModalHeader>
+                                    <ModalFooter>
+                                      <Button
+                                        color="danger"
+                                        variant="light"
+                                        onPress={onClose}
+                                      >
+                                        Cancel
+                                      </Button>
+                                      <Button
+                                        type="button"
+                                        color="danger"
+                                        onPress={onClose}
+                                        onClick={() => handleDeleteImage(id)}
+                                      >
+                                        Delete
+                                      </Button>
+                                    </ModalFooter>
+                                  </>
+                                )}
+                              </ModalContent>
+                            </Modal>
                           </div>
                         </div>
+                        <Divider className="my-2" />
                       </div>
                     ))}
                   <Button
