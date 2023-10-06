@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Card,
   CardBody,
@@ -11,19 +11,107 @@ import {
   SelectItem,
   CardHeader,
   Button,
+  Progress,
+  Image,
+  Tooltip,
 } from '@nextui-org/react';
 import { BiBed } from 'react-icons/bi';
 import { FaBath } from 'react-icons/fa';
 import { BsCloudUpload } from 'react-icons/bs';
 import { HiOutlineCurrencyRupee } from 'react-icons/hi';
+import { AiOutlineArrowLeft, AiOutlineEdit } from 'react-icons/ai';
+import Link from 'next/link';
+import { toast } from 'sonner';
+import {
+  getDownloadURL,
+  getStorage,
+  ref,
+  uploadBytesResumable,
+} from 'firebase/storage';
+import { app } from '@/app/firebase';
+import { PiTrashLight } from 'react-icons/pi';
 
 const CreateListing = () => {
+  const [files, setFiles] = useState([]);
+  const [filePerc, setFilePerc] = useState(0);
+  const [formData, setFormData] = useState({
+    imageUrls: [],
+  });
+  const [imageUploadError, setImageUploadError] = useState(false);
+  // console.log(files);
+  console.log(formData);
+  const handleImageSubmit = (e) => {
+    e.preventDefault();
+    if (files.length > 0 && files.length + formData.imageUrls.length < 7) {
+      const promises = [];
+
+      for (let i = 0; i < files.length; i++) {
+        promises.push(storeImage(files[i]));
+      }
+      Promise.all(promises)
+        .then((urls) => {
+          setFormData({
+            ...formData,
+            imageUrls: formData.imageUrls.concat(urls),
+          });
+          setImageUploadError(false);
+        })
+        .catch((error) => {
+          setImageUploadError('Image upload failed (2mb max per image)');
+        });
+    } else {
+      setImageUploadError('You can only upload 6 images per listing');
+    }
+  };
+
+  const storeImage = async (file) => {
+    return new Promise((resolve, reject) => {
+      const storage = getStorage(app);
+      const fileName = new Date().getTime() + file.name;
+      const storageRef = ref(storage, fileName);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+      uploadTask.on(
+        'state_changed',
+        (snapshot) => {
+          const progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log('Upload is ' + progress + '% done');
+          setFilePerc(Math.round(progress));
+        },
+        (error) => {
+          reject(error);
+        },
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            resolve(downloadURL);
+          });
+        }
+      );
+    });
+  };
+
+  const handleDeleteImage = (id) => {
+    setFormData({
+      ...formData,
+      imageUrls: formData.imageUrls.filter((_, i) => i !== id),
+    });
+  };
   return (
     <>
-      <div className="grid place-content-center my-5">
-        <h2 className="text-2xl text-center font-semibold text-slate-500 ">
-          Create Listing
-        </h2>
+      <div className="grid place-content-center my-10">
+        <div className="flex mb-5">
+          <Button
+            startContent={<AiOutlineArrowLeft />}
+            variant="ghost"
+            as={Link}
+            href="/profile"
+          >
+            Go to Profile
+          </Button>
+          <h2 className="text-2xl text-center m-auto font-semibold text-slate-500 ">
+            Create Listing
+          </h2>
+        </div>
         <div>
           <form className="flex  justify-between">
             <div className="me-20 my-5">
@@ -126,13 +214,77 @@ const CreateListing = () => {
                       type="file"
                       variant="bordered"
                       className="w-[100%]"
+                      onChange={(e) => setFiles(e.target.files)}
                       size="md"
                     />
-                    <Button color="success" variant="ghost">
+                    <Button
+                      type="button"
+                      onClick={handleImageSubmit}
+                      color="success"
+                      variant="ghost"
+                    >
                       Upload
                     </Button>
                   </div>
+                  {imageUploadError && imageUploadError ? (
+                    toast.error(imageUploadError)
+                  ) : filePerc > 0 && filePerc < 100 ? (
+                    <>
+                      <Progress
+                        aria-label="Uploading..."
+                        size="sm"
+                        value={filePerc}
+                        color="success"
+                        showValueLabel={true}
+                        className="max-w-md my-5"
+                      />
+                    </>
+                  ) : filePerc === 100 ? (
+                    <>
+                      <Progress
+                        aria-label="Uploading..."
+                        size="sm"
+                        value={filePerc}
+                        color="success"
+                        showValueLabel={true}
+                        className="max-w-md my-5"
+                      />
+                    </>
+                  ) : (
+                    ''
+                  )}
+                  {formData.imageUrls.length > 0 &&
+                    formData.imageUrls.map((url, id) => (
+                      <div key={id}>
+                        <div className="flex justify-between items-center">
+                          <Image
+                            width={100}
+                            height={100}
+                            src={url}
+                            alt="listing-image"
+                            className="my-2"
+                          />
+                          <div className="flex gap-3">
+                            <Tooltip showArrow={true} content="edit image">
+                              <Button type="button" isIconOnly>
+                                <AiOutlineEdit size={17} />
+                              </Button>
+                            </Tooltip>
+                            <Tooltip showArrow={true} content="delete image">
+                              <Button
+                                type="button"
+                                isIconOnly
+                                onClick={() => handleDeleteImage(id)}
+                              >
+                                <PiTrashLight size={17} />
+                              </Button>
+                            </Tooltip>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   <Button
+                    type="submit"
                     className="mt-4"
                     variant="ghost"
                     color="danger"

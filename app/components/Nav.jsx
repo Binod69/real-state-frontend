@@ -16,7 +16,7 @@ import {
   NavbarMenuToggle,
   NavbarMenu,
   NavbarMenuItem,
-  useDisclosure,
+  Tooltip,
 } from '@nextui-org/react';
 import { useSelector, useDispatch } from 'react-redux';
 import { AiOutlineSearch } from 'react-icons/ai';
@@ -105,7 +105,7 @@ const Nav = () => {
           />
           {currentUser ? (
             <>
-              <Dropdown placement="bottom-end">
+              <Dropdown placement="bottom">
                 <DropdownTrigger>
                   <Avatar
                     isBordered
@@ -117,6 +117,7 @@ const Nav = () => {
                     src={currentUser.data.avatar}
                   />
                 </DropdownTrigger>
+
                 <DropdownMenu aria-label="Profile Actions" variant="flat">
                   <DropdownItem key="user" className="h-14 gap-2">
                     <p className="font-semibold">Signed in as</p>
