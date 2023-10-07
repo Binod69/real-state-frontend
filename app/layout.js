@@ -18,7 +18,9 @@ export default function RootLayout({ children }) {
       <body className={inter.className}>
         <ReduxProvider>
           <UiProvider>
-            <Nav />
+            <header>
+              <Nav />
+            </header>
             <Toaster closeButton />
             <main>{children}</main>
           </UiProvider>

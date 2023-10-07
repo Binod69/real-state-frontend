@@ -1,5 +1,6 @@
 'use client';
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Card,
   CardBody,
@@ -37,7 +38,7 @@ import axiosInstance from '@/app/config/axios.config';
 import apiEndpoints from '@/app/config/apiEndpoints';
 
 const CreateListing = () => {
-  const currentUser = useSelector((state) => state.user);
+  const { currentUser } = useSelector((state) => state.user);
   const [files, setFiles] = useState([]);
   const [filePerc, setFilePerc] = useState(0);
   const [formData, setFormData] = useState({
@@ -53,13 +54,14 @@ const CreateListing = () => {
     offer: false,
     parking: false,
     furnished: false,
-    useRef: currentUser._id,
   });
   const [imageUploadError, setImageUploadError] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
   // console.log(files);
+
+  const router = useRouter();
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
@@ -165,17 +167,22 @@ const CreateListing = () => {
     e.preventDefault();
 
     try {
+      if (formData.imageUrls.length < 1)
+        return toast.error('You must upload at least one image!');
+
+      if (+formData.regularPrice < +formData.discountedPrice)
+        return toast.error('Discount price must be lower than regular price!');
       setLoading(true);
       setError(false);
 
-      // const dataToSend = {
-      //   ...formData,
-      //   userRef: currentUser._id,
-      // };
+      const dataToSend = {
+        ...formData,
+        userRef: currentUser.data._id,
+      };
 
       const res = await axiosInstance.post(
         apiEndpoints.CREATE_LISTING,
-        ...formData,
+        dataToSend,
         {
           withCredentials: true,
         }
@@ -189,6 +196,8 @@ const CreateListing = () => {
       } else {
         toast.success('Property added successfully');
       }
+      router.push(`/listing/${res.data._id}`);
+      console.log('id', res.data._id);
     } catch (error) {
       setError(error.message);
       setLoading(false);
@@ -323,7 +332,6 @@ const CreateListing = () => {
                   </div>
                   <div className="flex w-full flex-wrap md:flex-nowrap gap-4 mt-4">
                     <Input
-                      isClearable
                       type="number"
                       variant="bordered"
                       className="w-[100%]"
@@ -334,18 +342,19 @@ const CreateListing = () => {
                       value={formData.regularPrice}
                       id="regularPrice"
                     />
-                    <Input
-                      startContent={<HiOutlineCurrencyRupee />}
-                      isClearable
-                      type="number"
-                      variant="bordered"
-                      className="w-[100%]"
-                      label="Discounted Price"
-                      size="sm"
-                      onChange={handleChange}
-                      value={formData.discountedPrice}
-                      id="discountedPrice"
-                    />
+                    {formData.offer && (
+                      <Input
+                        startContent={<HiOutlineCurrencyRupee />}
+                        type="number"
+                        variant="bordered"
+                        className="w-[100%]"
+                        label="Discounted Price"
+                        size="sm"
+                        onChange={handleChange}
+                        value={formData.discountedPrice}
+                        id="discountedPrice"
+                      />
+                    )}
                   </div>
                 </CardBody>
               </Card>
